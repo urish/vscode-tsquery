@@ -39,7 +39,8 @@ async function showResults(matches: Node[][]) {
 
 async function astQueryFile() {
   const editor = vscode.window.activeTextEditor;
-  if (!editor || ['javascript', 'typescript'].indexOf(editor.document.languageId) < 0) {
+  const supportedLanguageIds = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
+  if (!editor || supportedLanguageIds.indexOf(editor.document.languageId) < 0) {
     vscode.window.showErrorMessage('AST Queries only supported for TypeScript and JavaScript files');
     return;
   }
