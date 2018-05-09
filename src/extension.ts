@@ -6,7 +6,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { tsquery } from '@phenomnomnominal/tsquery';
 import { getProgram } from 'typewiz-core';
-import { createCompilerHost, Node } from 'typescript';
+import { createCompilerHost, Node, SyntaxKind } from 'typescript';
+import { getNodeAtFileOffset } from './utils';
 
 interface IResult extends vscode.QuickPickItem {
   nodes: Node[];
@@ -102,9 +103,24 @@ async function astQueryWorkspace() {
   }
 }
 
+const TS_MODE: vscode.DocumentFilter = { language: 'typescript', scheme: 'file' };
+
+class TSHoverProvider implements vscode.HoverProvider {
+  public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
+    const ast = tsquery.ast(document.getText());
+    const node = getNodeAtFileOffset(ast, document.offsetAt(position));
+    if (node) {
+      return new vscode.Hover(new vscode.MarkdownString('AST Selector: `' + SyntaxKind[node.kind] + '`'));
+    } else {
+      return null;
+    }
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     ...[
+      vscode.languages.registerHoverProvider(TS_MODE, new TSHoverProvider()),
       vscode.commands.registerCommand('extension.astQueryFile', astQueryFile),
       vscode.commands.registerCommand('extension.astQueryWorkspace', astQueryWorkspace),
     ],
