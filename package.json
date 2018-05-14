@@ -2,11 +2,11 @@
     "name": "tsquery",
     "displayName": "tsquery",
     "description": "Search for TypeScript code using AST queries across the project",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "publisher": "urishaked",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/urish/ngx-moment.git"
+        "url": "git+https://github.com/urish/vscode-tsquery.git"
     },
     "engines": {
         "vscode": "^1.22.0"
