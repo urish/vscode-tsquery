@@ -3,7 +3,11 @@
     "displayName": "tsquery",
     "description": "Search for TypeScript code using AST queries across the project",
     "version": "0.1.0",
-    "publisher": "CodeMagic",
+    "publisher": "urishaked",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/urish/ngx-moment.git"
+    },
     "engines": {
         "vscode": "^1.22.0"
     },
@@ -36,6 +40,7 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
+        "deploy": "vsce publish",
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
