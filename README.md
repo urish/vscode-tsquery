@@ -1,65 +1,21 @@
-# tsquery README
+# TSQuery for VSCode
 
-This is the README for your extension "tsquery". After writing up a brief description, we recommend including the following sections.
+TSQuery enables powerful source code search in TypeScript and JavaScript projects.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+You can use TSQuery to search your source code using an AST query. AST queries are similar to CSS selectors - they let you drill down the hierarchy of code declarations and match the specific language elements that you are looking for.
 
-For example if there is an image subfolder under your extension project workspace:
+For instance, the following demo shows how to search for a parameter of a class constructors in the current file:
 
-\!\[feature X\]\(images/feature-x.png\)
+![AST Query](images/vscode-tsquery.gif)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+> Tip: You can find out which selector matches a certain part of your source code by simply hovering it and looking for "AST Selector" inside the tooltip.
 
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+This extension is still in development - we are looking for ideas to improve the searching experience. You are invited to [contribute](https://github.com/urish/vscode-tsquery).
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.1.0
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release of TSQuery

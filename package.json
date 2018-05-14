@@ -2,7 +2,7 @@
     "name": "tsquery",
     "displayName": "tsquery",
     "description": "Search for TypeScript code using AST queries across the project",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "publisher": "CodeMagic",
     "engines": {
         "vscode": "^1.22.0"
