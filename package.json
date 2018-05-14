@@ -11,6 +11,10 @@
         "Other"
     ],
     "activationEvents": [
+        "onLanguage:typescript",
+        "onLanguage:javascript",
+        "onLanguage:typescriptreact",
+        "onLanguage:javascriptreact",
         "onCommand:extension.astQueryFile",
         "onCommand:extension.astQueryWorkspace"
     ],
