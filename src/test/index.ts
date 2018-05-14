@@ -12,9 +12,13 @@
 
 import * as testRunner from 'vscode/lib/testrunner';
 
+// workaround for running tests inside vscode
+(global as any).suite = () => 0;
+
 // You can directly control Mocha options by uncommenting the following lines
 // See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for more info
 testRunner.configure({
+    ui: 'bdd',
     useColors: true // colored output from test results
 });
 
