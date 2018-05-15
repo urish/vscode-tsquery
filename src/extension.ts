@@ -2,7 +2,6 @@
 
 require('util.promisify/shim')();
 
-import * as util from 'util'
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { tsquery } from '@phenomnomnominal/tsquery';
@@ -14,11 +13,13 @@ interface IResult extends vscode.QuickPickItem {
   nodes: Node[];
 }
 
+type Scope = "file" | "workspace"
+
 class Operation implements vscode.QuickPickItem {
-  public constructor(public label: string, public description : string = "", public detail : string = "", public func: (op:Operation)=>void) {
+  public constructor(public label: string, public description : string = "", public detail : string = "", public func: (op:Operation, where:Scope)=>void) {
   }
-  public execute() {
-    this.func(this)
+  public execute(scope:Scope) {
+    this.func(this, scope)
   }
 }
 
@@ -49,11 +50,12 @@ async function showResults(matches: Node[][]) {
 
 function getOps() : Array<vscode.QuickPickItem> {
   return [
-    new Operation( "Find all uses of 'any'",  "Query: 'AnyKeyword'", 
+    new Operation( "AnyKeyword",  "Find all uses of the 'any' keyword", 
                    "This operation will search the current file for all variables and parameters that have the type 'any'", 
-                   () => astCustomQueryFile("AnyKeyword")
+                   (op:Operation, scope:Scope) => astCustomQuery(scope, "AnyKeyword")
                   ),
-    new Operation( "Custom search",  "write your own TSQuery expression", "examples:..", () => astCustomQueryFile()),
+    new Operation( "Custom query",  "write your own TSQuery expression", "examples:..", () => astCustomQueryFile()),
+    new Operation( "More help",  "go to http://tsquery-reference", undefined, () => astCustomQueryFile()),
   ]
 }
 
@@ -68,21 +70,40 @@ function getEditor() : vscode.TextEditor | null {
 }
 
 async function astQueryFile() {
+  return showQueryPicker("file")
+}
+
+async function astQueryWorkspace() {
+  return showQueryPicker("workspace")
+}
+
+
+async function showQueryPicker(scope:Scope)
+{
   const editor = getEditor()
   if (!editor) return;
 
   const op : Operation = await vscode.window.showQuickPick(getOps(),{
     placeHolder: "Please select a query",
-    onDidSelectItem: (item:vscode.QuickPickItem) => {
-      vscode.window.showInformationMessage(util.inspect(item))
-    },
+    // onDidSelectItem: (item:vscode.QuickPickItem) => {
+    //   vscode.window.showInformationMessage(util.inspect(item))
+    // },
     matchOnDescription: true,
   }) as Operation
 
-  vscode.window.showInformationMessage(op ? op.label :  "no selection")
+  // TODO: add a 'debug' flag and show the info message only in debug mode
+  // vscode.window.showInformationMessage(op ? op.label :  "no selection")
 
   if ( op ) {
-    op.execute()
+    op.execute(scope)
+  }
+}
+
+async function astCustomQuery(scope:Scope, astQuery?:string) {
+  if ( scope == "file" ) {
+    return astCustomQueryFile(astQuery)
+  } else if ( scope == "workspace" ) {
+    return astCustomQueryWorkspace(astQuery)
   }
 }
 
@@ -107,7 +128,7 @@ async function astCustomQueryFile(astQuery?:string) {
   }
 }
 
-async function astQueryWorkspace() {
+async function astCustomQueryWorkspace(astQuery?:string) {
   const tsconfigFiles = await vscode.workspace.findFiles('tsconfig.json');
   if (!tsconfigFiles.length) {
     vscode.window.showErrorMessage('Could not find any tsconfig.json file in your project');
@@ -116,10 +137,13 @@ async function astQueryWorkspace() {
     console.error('TODO: Implement quick pick here');
   }
 
-  const astQuery = await vscode.window.showInputBox({
-    prompt: 'AST Query to search for',
-    placeHolder: 'e.g. Constructor',
-  });
+  if ( astQuery == undefined ) {
+    astQuery = await vscode.window.showInputBox({
+      prompt: 'AST Query to search for',
+      placeHolder: 'e.g. Constructor',
+    });
+  }
+
   if (astQuery) {
     const tsconfigPath = tsconfigFiles[0].fsPath;
     const program = getProgram({
