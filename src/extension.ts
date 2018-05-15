@@ -13,6 +13,16 @@ interface IResult extends vscode.QuickPickItem {
   nodes: Node[];
 }
 
+type Scope = "file" | "workspace"
+
+class Operation implements vscode.QuickPickItem {
+  public constructor(public label: string, public description : string = "", public detail : string = "", public func: (op:Operation, where:Scope)=>void) {
+  }
+  public execute(scope:Scope) {
+    this.func(this, scope)
+  }
+}
+
 function highlightNode(editor: vscode.TextEditor, node: Node) {
   const startPos = editor.document.positionAt(node.getStart());
   const endPos = editor.document.positionAt(node.getEnd());
@@ -38,18 +48,75 @@ async function showResults(matches: Node[][]) {
   }
 }
 
-async function astQueryFile() {
+function getOps() : Array<vscode.QuickPickItem> {
+  return [
+    new Operation( "AnyKeyword",  "Find all uses of the 'any' keyword", 
+                   "This operation will search the current file for all variables and parameters that have the type 'any'", 
+                   (op:Operation, scope:Scope) => astCustomQuery(scope, "AnyKeyword")
+                  ),
+    new Operation( "Custom query",  "write your own TSQuery expression", "examples:..", () => astCustomQueryFile()),
+    new Operation( "More help",  "go to http://tsquery-reference", undefined, () => astCustomQueryFile()),
+  ]
+}
+
+function getEditor() : vscode.TextEditor | null {
   const editor = vscode.window.activeTextEditor;
   const supportedLanguageIds = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
   if (!editor || supportedLanguageIds.indexOf(editor.document.languageId) < 0) {
     vscode.window.showErrorMessage('AST Queries only supported for TypeScript and JavaScript files');
-    return;
+    return null;
   }
+  return editor
+}
 
-  const astQuery = await vscode.window.showInputBox({
-    prompt: 'AST Query to search for',
-    placeHolder: 'e.g. Constructor',
-  });
+async function astQueryFile() {
+  return showQueryPicker("file")
+}
+
+async function astQueryWorkspace() {
+  return showQueryPicker("workspace")
+}
+
+
+async function showQueryPicker(scope:Scope)
+{
+  const editor = getEditor()
+  if (!editor) return;
+
+  const op : Operation = await vscode.window.showQuickPick(getOps(),{
+    placeHolder: "Please select a query",
+    // onDidSelectItem: (item:vscode.QuickPickItem) => {
+    //   vscode.window.showInformationMessage(util.inspect(item))
+    // },
+    matchOnDescription: true,
+  }) as Operation
+
+  // TODO: add a 'debug' flag and show the info message only in debug mode
+  // vscode.window.showInformationMessage(op ? op.label :  "no selection")
+
+  if ( op ) {
+    op.execute(scope)
+  }
+}
+
+async function astCustomQuery(scope:Scope, astQuery?:string) {
+  if ( scope == "file" ) {
+    return astCustomQueryFile(astQuery)
+  } else if ( scope == "workspace" ) {
+    return astCustomQueryWorkspace(astQuery)
+  }
+}
+
+async function astCustomQueryFile(astQuery?:string) {
+  const editor = getEditor()
+  if (!editor) return;
+
+  if ( astQuery == undefined ) {
+    astQuery = await vscode.window.showInputBox({
+      prompt: 'AST Query to search for. Example queries:',
+      placeHolder: 'e.g. Constructor',
+    });
+  }
   if (astQuery) {
     const ast = tsquery.ast(editor.document.getText(), editor.document.fileName);
     const nodes = tsquery(ast, astQuery);
@@ -61,7 +128,7 @@ async function astQueryFile() {
   }
 }
 
-async function astQueryWorkspace() {
+async function astCustomQueryWorkspace(astQuery?:string) {
   const tsconfigFiles = await vscode.workspace.findFiles('tsconfig.json');
   if (!tsconfigFiles.length) {
     vscode.window.showErrorMessage('Could not find any tsconfig.json file in your project');
@@ -70,10 +137,13 @@ async function astQueryWorkspace() {
     console.error('TODO: Implement quick pick here');
   }
 
-  const astQuery = await vscode.window.showInputBox({
-    prompt: 'AST Query to search for',
-    placeHolder: 'e.g. Constructor',
-  });
+  if ( astQuery == undefined ) {
+    astQuery = await vscode.window.showInputBox({
+      prompt: 'AST Query to search for',
+      placeHolder: 'e.g. Constructor',
+    });
+  }
+
   if (astQuery) {
     const tsconfigPath = tsconfigFiles[0].fsPath;
     const program = getProgram({
