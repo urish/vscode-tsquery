@@ -2,6 +2,7 @@
 
 require('util.promisify/shim')();
 
+import * as util from 'util'
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { tsquery } from '@phenomnomnominal/tsquery';
@@ -11,6 +12,14 @@ import { getNodeAtFileOffset } from './utils';
 
 interface IResult extends vscode.QuickPickItem {
   nodes: Node[];
+}
+
+class Operation implements vscode.QuickPickItem {
+  public constructor(public label: string, public description : string = "", public detail : string = "", public func: (op:Operation)=>void) {
+  }
+  public execute() {
+    this.func(this)
+  }
 }
 
 function highlightNode(editor: vscode.TextEditor, node: Node) {
@@ -38,18 +47,55 @@ async function showResults(matches: Node[][]) {
   }
 }
 
-async function astQueryFile() {
+function getOps() : Array<vscode.QuickPickItem> {
+  return [
+    new Operation( "Find all uses of 'any'",  "Query: 'AnyKeyword'", 
+                   "This operation will search the current file for all variables and parameters that have the type 'any'", 
+                   () => astCustomQueryFile("AnyKeyword")
+                  ),
+    new Operation( "Custom search",  "write your own TSQuery expression", "examples:..", () => astCustomQueryFile()),
+  ]
+}
+
+function getEditor() : vscode.TextEditor | null {
   const editor = vscode.window.activeTextEditor;
   const supportedLanguageIds = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
   if (!editor || supportedLanguageIds.indexOf(editor.document.languageId) < 0) {
     vscode.window.showErrorMessage('AST Queries only supported for TypeScript and JavaScript files');
-    return;
+    return null;
   }
+  return editor
+}
 
-  const astQuery = await vscode.window.showInputBox({
-    prompt: 'AST Query to search for',
-    placeHolder: 'e.g. Constructor',
-  });
+async function astQueryFile() {
+  const editor = getEditor()
+  if (!editor) return;
+
+  const op : Operation = await vscode.window.showQuickPick(getOps(),{
+    placeHolder: "Please select a query",
+    onDidSelectItem: (item:vscode.QuickPickItem) => {
+      vscode.window.showInformationMessage(util.inspect(item))
+    },
+    matchOnDescription: true,
+  }) as Operation
+
+  vscode.window.showInformationMessage(op ? op.label :  "no selection")
+
+  if ( op ) {
+    op.execute()
+  }
+}
+
+async function astCustomQueryFile(astQuery?:string) {
+  const editor = getEditor()
+  if (!editor) return;
+
+  if ( astQuery == undefined ) {
+    astQuery = await vscode.window.showInputBox({
+      prompt: 'AST Query to search for. Example queries:',
+      placeHolder: 'e.g. Constructor',
+    });
+  }
   if (astQuery) {
     const ast = tsquery.ast(editor.document.getText(), editor.document.fileName);
     const nodes = tsquery(ast, astQuery);
