@@ -11,3 +11,9 @@ export function getNodeAtFileOffset(node: ts.Node, offset: number) {
   visit(node);
   return result;
 }
+
+export const supportedLanguageIds = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
+
+export function isSupportedLanguage(langId: string) {
+  return supportedLanguageIds.indexOf(langId) >= 0;
+}

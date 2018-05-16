@@ -7,7 +7,8 @@ import * as path from 'path';
 import { tsquery } from '@phenomnomnominal/tsquery';
 import { getProgram } from 'typewiz-core';
 import { createCompilerHost, Node, SyntaxKind } from 'typescript';
-import { getNodeAtFileOffset } from './utils';
+import { getNodeAtFileOffset, isSupportedLanguage } from './utils';
+import { ASTViewProvider } from './astViewProvider';
 
 interface IResult extends vscode.QuickPickItem {
   nodes: Node[];
@@ -67,8 +68,7 @@ function getOps(): Array<vscode.QuickPickItem> {
 
 function getEditor(): vscode.TextEditor | null {
   const editor = vscode.window.activeTextEditor;
-  const supportedLanguageIds = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
-  if (!editor || supportedLanguageIds.indexOf(editor.document.languageId) < 0) {
+  if (!editor || !isSupportedLanguage(editor.document.languageId)) {
     vscode.window.showErrorMessage('AST Queries only supported for TypeScript and JavaScript files');
     return null;
   }
@@ -111,6 +111,10 @@ async function astCustomQuery(scope: Scope, astQuery?: string) {
   } else if (scope === 'workspace') {
     return astCustomQueryWorkspace(astQuery);
   }
+}
+
+function revealAstNodeInSource(node: Node) {
+  highlightNode(getEditor()!, node);
 }
 
 async function astCustomQueryFile(astQuery?: string) {
@@ -196,9 +200,16 @@ class TSHoverProvider implements vscode.HoverProvider {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  const astViewProvider = new ASTViewProvider();
+  const astTreeView = vscode.window.createTreeView('astView', { treeDataProvider: astViewProvider });
+  astViewProvider.setTreeView(astTreeView);
+  
   context.subscriptions.push(
     ...[
+      astTreeView,
+      astViewProvider,
       vscode.languages.registerHoverProvider(TS_MODE, new TSHoverProvider()),
+      vscode.commands.registerCommand('astView.revealASTNodeInSource', revealAstNodeInSource),
       vscode.commands.registerCommand('extension.astQueryFile', astQueryFile),
       vscode.commands.registerCommand('extension.astQueryWorkspace', astQueryWorkspace),
     ],
