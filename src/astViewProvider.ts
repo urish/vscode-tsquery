@@ -83,4 +83,13 @@ class ASTNodeItem extends vscode.TreeItem {
       title: 'Show in source code',
     };
   }
+
+  get tooltip() {
+    const syntaxKind = ts.SyntaxKind[this.node.kind];
+    if (ts.isIdentifier(this.node)) {
+      return `${syntaxKind}[name=${this.node.text}]`;
+    } else {
+      return syntaxKind;
+    }
+  }
 }
