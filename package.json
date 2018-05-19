@@ -62,7 +62,7 @@
     "vscode": "^1.1.6"
   },
   "dependencies": {
-    "@phenomnomnominal/tsquery": "0.1.0-beta.1",
+    "@phenomnomnominal/tsquery": "^1.0.0",
     "typewiz-core": "^1.0.2",
     "util.promisify": "^1.0.0"
   },

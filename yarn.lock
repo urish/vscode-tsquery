@@ -16,9 +16,9 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@phenomnomnominal/tsquery@0.1.0-beta.1":
-  version "0.1.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@phenomnomnominal/tsquery/-/tsquery-0.1.0-beta.1.tgz#029147f74d78518c4b5c3f8d68bbd2feeb7d8413"
+"@phenomnomnominal/tsquery@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@phenomnomnominal/tsquery/-/tsquery-1.0.0.tgz#c8d8c62183d854f2160ce7270401bf3d1158e182"
   dependencies:
     esquery "^1.0.1"
 
