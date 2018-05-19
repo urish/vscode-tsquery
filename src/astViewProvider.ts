@@ -72,6 +72,10 @@ class ASTNodeItem extends vscode.TreeItem {
     );
   }
 
+  get id() {
+    return ts.SyntaxKind[this.node.kind] + '@' + this.node.getStart();
+  }
+
   get command() {
     return {
       command: 'astView.revealASTNodeInSource',
