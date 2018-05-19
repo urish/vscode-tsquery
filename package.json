@@ -26,11 +26,19 @@
     "commands": [
       {
         "command": "extension.astQueryFile",
-        "title": "TSQuery AST Search in Current File"
+        "title": "TSQuery Search in Current File",
+        "icon": {
+          "light": "resources/light/query-file.svg",
+          "dark": "resources/dark/query-file.svg"
+        }
       },
       {
         "command": "extension.astQueryWorkspace",
-        "title": "TSQuery AST Search in Workspace"
+        "title": "TSQuery Search in Workspace",
+        "icon": {
+          "light": "resources/light/query-workspace.svg",
+          "dark": "resources/dark/query-workspace.svg"
+        }
       }
     ],
     "views": {
@@ -38,6 +46,25 @@
         {
           "id": "astView",
           "name": "AST View"
+        }
+      ]
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "extension.astQueryFile"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "extension.astQueryFile",
+          "when": "view == astView",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.astQueryWorkspace",
+          "when": "view == astView",
+          "group": "navigation"
         }
       ]
     }
