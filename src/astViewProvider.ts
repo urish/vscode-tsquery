@@ -22,7 +22,7 @@ export class ASTViewProvider implements vscode.TreeDataProvider<ASTNodeItem>, vs
   }
 
   private revealItem(editor: vscode.TextEditor, position: vscode.Position) {
-    if (this.treeView) {
+    if (this.treeView && isSupportedLanguage(editor.document.languageId)) {
       const { document } = editor;
       const ast = tsquery.ast(document.getText());
       const node = getNodeAtFileOffset(ast, document.offsetAt(position));
