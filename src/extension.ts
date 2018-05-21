@@ -7,7 +7,7 @@ import * as path from 'path';
 import { tsquery } from '@phenomnomnominal/tsquery';
 import { getProgram } from 'typewiz-core';
 import { createCompilerHost, Node, SyntaxKind } from 'typescript';
-import { getNodeAtFileOffset, isSupportedLanguage } from './utils';
+import { getNodeAtFileOffset, isSupportedLanguage, filterExcludedFiles } from './utils';
 import { ASTViewProvider } from './astViewProvider';
 
 interface IResult extends vscode.QuickPickItem {
@@ -170,8 +170,8 @@ async function astCustomQueryWorkspace(astQuery?: string) {
     }
 
     const matches: Node[][] = [];
-    for (let source of program.getSourceFiles()) {
-      const nodes = tsquery(source, astQuery);
+    for (const file of filterExcludedFiles(program.getSourceFiles())) {
+      const nodes = tsquery(file, astQuery);
       if (nodes.length) {
         matches.push(nodes);
       }
@@ -203,7 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
   const astViewProvider = new ASTViewProvider();
   const astTreeView = vscode.window.createTreeView('astView', { treeDataProvider: astViewProvider });
   astViewProvider.setTreeView(astTreeView);
-  
+
   context.subscriptions.push(
     ...[
       astTreeView,

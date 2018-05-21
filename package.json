@@ -23,6 +23,17 @@
   ],
   "main": "./out/extension",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "TSQuery extension configuration",
+      "properties": {
+        "tsquery.exclude": {
+          "description": "Configure glob patterns for excluding files and folders in searches",
+          "type": "array",
+          "default": ["**/node_modules/*/**"]
+        }
+      }
+    },
     "commands": [
       {
         "command": "extension.astQueryFile",
@@ -79,6 +90,7 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
+    "@types/minimatch": "^3.0.3",
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
     "husky": "^0.14.3",
@@ -90,6 +102,7 @@
   },
   "dependencies": {
     "@phenomnomnominal/tsquery": "^1.0.0",
+    "minimatch": "^3.0.4",
     "typewiz-core": "^1.0.2",
     "util.promisify": "^1.0.0"
   },

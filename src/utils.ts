@@ -1,4 +1,6 @@
 import * as ts from 'typescript';
+import * as vscode from 'vscode';
+import * as minimatch from 'minimatch';
 
 export function getNodeAtFileOffset(node: ts.Node, offset: number) {
   let result = null as ts.Node | null;
@@ -16,4 +18,13 @@ export const supportedLanguageIds = ['javascript', 'javascriptreact', 'typescrip
 
 export function isSupportedLanguage(langId: string) {
   return supportedLanguageIds.indexOf(langId) >= 0;
+}
+
+export function filterExcludedFiles(files: ReadonlyArray<ts.SourceFile>) {
+  const excludedPatterns = vscode.workspace.getConfiguration('tsquery').get('exclude') as Array<string>;
+  let filteredFiles = files;
+  for (const pattern of excludedPatterns) {
+    filteredFiles = files.filter(({ fileName }) => !minimatch(fileName, pattern, { dot: true }));
+  }
+  return filteredFiles;
 }
