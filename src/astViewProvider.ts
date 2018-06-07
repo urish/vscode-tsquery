@@ -67,13 +67,13 @@ export class ASTViewProvider implements vscode.TreeDataProvider<ASTNodeItem>, vs
 class ASTNodeItem extends vscode.TreeItem {
   constructor(readonly node: ts.Node) {
     super(
-      ts.SyntaxKind[node.kind],
+      tsquery.syntaxKindName(node.kind),
       node.getChildCount() ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
     );
   }
 
   get id() {
-    return ts.SyntaxKind[this.node.kind] + '@' + this.node.getStart();
+    return tsquery.syntaxKindName(this.node.kind) + '@' + this.node.getStart();
   }
 
   get command() {
@@ -85,7 +85,7 @@ class ASTNodeItem extends vscode.TreeItem {
   }
 
   get tooltip() {
-    const syntaxKind = ts.SyntaxKind[this.node.kind];
+    const syntaxKind = tsquery.syntaxKindName(this.node.kind);
     if (ts.isIdentifier(this.node)) {
       return `${syntaxKind}[name=${this.node.text}]`;
     } else {
