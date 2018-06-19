@@ -1,6 +1,7 @@
+import { tsquery } from '@phenomnomnominal/tsquery';
+import * as minimatch from 'minimatch';
 import * as ts from 'typescript';
 import * as vscode from 'vscode';
-import * as minimatch from 'minimatch';
 
 export function getNodeAtFileOffset(node: ts.Node, offset: number) {
   let result = null as ts.Node | null;
@@ -27,4 +28,16 @@ export function filterExcludedFiles(files: ReadonlyArray<ts.SourceFile>) {
     filteredFiles = files.filter(({ fileName }) => !minimatch(fileName, pattern, { dot: true }));
   }
   return filteredFiles;
+}
+
+export function nodeToSelector(node: ts.Node) {
+  const syntaxKind = tsquery.syntaxKindName(node.kind);
+  const enriched = tsquery.query(node, '*')[0];
+  if (ts.isIdentifier(node)) {
+    return `${syntaxKind}[name=${node.text}]`;
+  } else if (enriched.value) {
+    return `${syntaxKind}[value=${enriched.value}]`;
+  } else {
+    return syntaxKind;
+  }
 }

@@ -2,13 +2,13 @@
 
 require('util.promisify/shim')();
 
-import * as vscode from 'vscode';
-import * as path from 'path';
 import { tsquery } from '@phenomnomnominal/tsquery';
+import * as path from 'path';
+import { createCompilerHost, Node } from 'typescript';
 import { getProgram } from 'typewiz-core';
-import { createCompilerHost, Node, SyntaxKind } from 'typescript';
-import { getNodeAtFileOffset, isSupportedLanguage, filterExcludedFiles } from './utils';
+import * as vscode from 'vscode';
 import { ASTViewProvider } from './astViewProvider';
+import { filterExcludedFiles, getNodeAtFileOffset, isSupportedLanguage, nodeToSelector } from './utils';
 
 interface IResult extends vscode.QuickPickItem {
   nodes: Node[];
@@ -192,7 +192,7 @@ class TSHoverProvider implements vscode.HoverProvider {
     const ast = tsquery.ast(document.getText());
     const node = getNodeAtFileOffset(ast, document.offsetAt(position));
     if (node) {
-      return new vscode.Hover(new vscode.MarkdownString('AST Selector: `' + SyntaxKind[node.kind] + '`'));
+      return new vscode.Hover(new vscode.MarkdownString('AST Selector: `' + nodeToSelector(node) + '`'));
     } else {
       return null;
     }

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as ts from 'typescript';
 import { tsquery } from '@phenomnomnominal/tsquery';
-import { isSupportedLanguage, getNodeAtFileOffset } from './utils';
+import { isSupportedLanguage, getNodeAtFileOffset, nodeToSelector } from './utils';
 
 export class ASTViewProvider implements vscode.TreeDataProvider<ASTNodeItem>, vscode.Disposable {
   private _onDidChangeTreeData: vscode.EventEmitter<ASTNodeItem | null> = new vscode.EventEmitter<ASTNodeItem | null>();
@@ -85,11 +85,6 @@ class ASTNodeItem extends vscode.TreeItem {
   }
 
   get tooltip() {
-    const syntaxKind = tsquery.syntaxKindName(this.node.kind);
-    if (ts.isIdentifier(this.node)) {
-      return `${syntaxKind}[name=${this.node.text}]`;
-    } else {
-      return syntaxKind;
-    }
+    return nodeToSelector(this.node);
   }
 }
